@@ -1,0 +1,85 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# NOTE: there is deliberately no live-integration job. A real Drone needs an SCM
+# behind it (repos only enter Drone by syncing from Gitea/Forgejo), a runner to
+# execute anything, and a token injected into the DB — see spike/VERIFIED_FINDINGS.md.
+# That stack is not committed yet. Add the job when it is; do not fake it in the
+# meantime, and do not let its absence weaken the hermetic tier, which is what
+# actually guards a PR.
+jobs:
+  # Fast, hermetic unit tests across every supported Python.
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e '.[test]'
+      # The MARKER selects the hermetic set — never a file list, which silently
+      # fails to grow when someone adds a test file.
+      - name: Unit tests (no server, no network)
+        run: python -m pytest -m "not integration" -q
+
+  # Verify the distributables build and actually run.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The package + its runtime deps, so PyInstaller has everything to bundle.
+      - run: pip install -e '.[build]' build
+      - name: Build wheel + sdist
+        run: |
+          python -m build
+          ls -l dist
+      - name: Install the wheel into a clean venv and smoke-test
+        run: |
+          # A clean venv, because `pip install -e .` in the job venv would make a
+          # broken wheel look installable — the entry point would resolve from the
+          # source tree either way.
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install dist/*.whl
+          /tmp/clean/bin/drone-cli --version
+      - name: Build the single-file binary
+        run: python scripts/build_binary.py
+      - name: Smoke-test the binary
+        run: ./dist/drone-cli --version
+
+  # Generated docs can never drift: regenerate, then fail if anything changed.
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Regenerate docs/COMMANDS.md
+        run: python scripts/gen_docs.py
+      - name: Fail if the committed docs are stale
+        run: |
+          # `add -N` registers any brand-new file with the index so `git diff`
+          # sees it. Without it an entirely uncommitted docs/COMMANDS.md is
+          # untracked, diffs clean, and this check passes while shipping no docs.
+          git add -N docs/
+          git diff --exit-code docs/ || {
+            echo "::error::docs/COMMANDS.md is out of date — run: python scripts/gen_docs.py"
+            exit 1
+          }
