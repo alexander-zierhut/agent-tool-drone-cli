@@ -1,0 +1,44 @@
+# SPIKE: can drone-server boot with a dummy SCM config and serve the API to a
+# pre-seeded machine token (DRONE_USER_CREATE)? No OAuth, no browser.
+services:
+  gitea:
+    image: gitea/gitea:1.22
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__server__ROOT_URL: "http://gitea:3000/"
+      GITEA__server__HTTP_PORT: "3000"
+      GITEA__database__DB_TYPE: "sqlite3"
+      GITEA__service__DISABLE_REGISTRATION: "false"
+      GITEA__webhook__ALLOWED_HOST_LIST: "*"
+    ports:
+      - "3000:3000"
+
+  drone:
+    image: drone/drone:2
+    depends_on: [gitea]
+    environment:
+      DRONE_GITEA_SERVER: "http://gitea:3000"
+      DRONE_GITEA_CLIENT_ID: "dummy-client-id"
+      DRONE_GITEA_CLIENT_SECRET: "dummy-client-secret"
+      DRONE_RPC_SECRET: "spike-rpc-secret"
+      DRONE_SERVER_HOST: "drone"
+      DRONE_SERVER_PROTO: "http"
+      DRONE_USER_CREATE: "username:droneadmin,admin:true,token:spike-known-token-0123456789"
+      DRONE_LOGS_DEBUG: "true"
+    ports:
+      - "8080:80"
+
+  runner:
+    image: drone/drone-runner-docker:1
+    depends_on: [drone]
+    environment:
+      DRONE_RPC_PROTO: "http"
+      DRONE_RPC_HOST: "drone"
+      DRONE_RPC_SECRET: "spike-rpc-secret"
+      DRONE_RUNNER_CAPACITY: "2"
+      DRONE_RUNNER_NAME: "spike-runner"
+      DRONE_RUNNER_NETWORKS: "dronespike_default"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-tool-drone-cli"
+description = "Agent-ready command-line interface for Drone CI (builds, logs, repos, secrets, crons, usage reporting). Installs the `drone-cli` command."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Zierhut IT" }, { name = "Alexander Zierhut" }]
+dynamic = ["version"]
+keywords = [
+    "drone", "drone-ci", "droneci", "cli", "command-line", "drone-api",
+    "ci-cd", "continuous-integration", "pipelines", "builds",
+    "ai-agent", "llm", "automation", "devops",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+dependencies = [
+    # The shared chassis: exit-code contract, Emitter, credentials, AppSpec.
+    # Pinned to a major -- the exit codes and output shapes are published API.
+    "agent-tool-shared-cli>=0.1,<0.2",
+    "typer>=0.12",
+    "httpx>=0.27",
+    "keyring>=25",
+    "rich>=13",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+    "pytest-timeout>=2.3",
+]
+build = [
+    "pyinstaller>=6",
+]
+
+[project.urls]
+Homepage = "https://github.com/alexander-zierhut/agent-tool-drone-cli"
+Repository = "https://github.com/alexander-zierhut/agent-tool-drone-cli"
+Issues = "https://github.com/alexander-zierhut/agent-tool-drone-cli/issues"
+Changelog = "https://github.com/alexander-zierhut/agent-tool-drone-cli/releases"
+
+[project.scripts]
+# Only `drone-cli`. The name `drone` is intentionally NOT claimed -- it belongs to
+# the official harness/drone-cli binary, which most Drone users already have on
+# PATH; the two are designed to coexist. `drone-agent` is also refused: "agent"
+# means the runner in Drone's own vocabulary. Alias it if you want it shorter.
+drone-cli = "dronecli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Single source of truth for the version (the scar opcli carries: it duplicates
+# the number in pyproject.toml AND __init__.py, so a bump can ship a wheel that
+# reports the wrong version in its User-Agent and in the skill it writes).
+[tool.setuptools.dynamic]
+version = { attr = "dronecli.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+markers = [
+    "integration: talks to a live Drone server (requires DRONE_SERVER + DRONE_TOKEN)",
+    "needs_runner: additionally requires a drone-runner attached to execute builds",
+]
+timeout = 120
