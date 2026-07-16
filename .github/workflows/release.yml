@@ -38,6 +38,14 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Re-running a release is a normal thing to need: v0.1.0's Windows
+          # binary failed, the fix meant moving the tag, and the re-run then died
+          # on "File already exists" for a version that had published perfectly.
+          # A red release for an artifact that is already correct trains people to
+          # ignore red. Forgetting to bump is caught by the tag-vs-built-version
+          # guard above, so nothing is silently swallowed here.
+          skip-existing: true
 
       - name: Attach dists to the release
         if: startsWith(github.ref, 'refs/tags/v')
