@@ -413,7 +413,7 @@ build-number-centric framing of `build wait` in §4.
 6. **Every setting has a sane default, or the CLI asks on first run.** No silent
    half-configured state.
 7. **First run sets up login**: ask for the server URL, then — knowing the URL — *show
-   where to get the token*: `https://drone.zierhut-it.de/account`. Derive that link
+   where to get the token*: `https://drone.example.com/account`. Derive that link
    from what the user just typed rather than making them hunt.
 
 **Env vars (clarified):** `DRONE_SERVER` / `DRONE_TOKEN` are the ecosystem standard —

@@ -20,8 +20,8 @@ def _hermetic(monkeypatch, tmp_path):
 # ---- the token URL (requirement: show the user where to get a token) ----
 
 def test_token_url_is_derived_from_the_server():
-    assert token_url("https://drone.zierhut-it.de") == "https://drone.zierhut-it.de/account"
-    assert token_url("https://drone.zierhut-it.de/") == "https://drone.zierhut-it.de/account"
+    assert token_url("https://drone.example.com") == "https://drone.example.com/account"
+    assert token_url("https://drone.example.com/") == "https://drone.example.com/account"
 
 
 # ---- profiles / env ----------------------------------------------------
