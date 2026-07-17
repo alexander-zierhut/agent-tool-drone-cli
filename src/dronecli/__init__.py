@@ -1,3 +1,3 @@
 """dronecli — an agent-friendly command-line interface for Drone CI."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
