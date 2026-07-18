@@ -62,6 +62,50 @@ agents.
 pipeline automation, CI/CD CLI, build logs, continuous integration tooling,
 promote deployment, AI agent tool, LLM tooling, Claude, DevOps automation.
 
+## The command surface
+
+Everything is discoverable from the binary — `drone-cli --help`, then
+`drone-cli guide` for the playbook and `drone-cli <group> --help` for any group.
+The top level:
+
+```text
+ Usage: drone-cli [OPTIONS] COMMAND [ARGS]...
+
+ Agent-friendly CLI for Drone CI (builds, logs, repos, secrets, crons,
+ deployments).
+
+ Output is JSON on stdout by default (errors are JSON on stderr with a non-zero
+ exit code); add `-o table` or trim with `--fields number,status`. Address builds
+ by COMMIT, not by number: `drone-cli wait --commit HEAD`.
+
+ New here / no context? Run `drone-cli guide` for the full playbook.
+
+╭─ Commands ───────────────────────────────────────────────────────────────────────╮
+│ guide      Built-in operating guide — how to use this CLI without external docs. │
+│ wait       Wait for a commit's build to finish. `--commit HEAD` after a push.    │
+│ promote    Promote a commit/build to a target (default: prod).                   │
+│ auth       Log in, log out, inspect credentials.                                 │
+│ repo       Repositories: list, enable, sync, inspect.                            │
+│ build      Builds: list, inspect, run, restart, cancel, wait.                    │
+│ log        Build logs — including just the failing step.                         │
+│ deploy     Deployments: what is on prod, and what got it there.                  │
+│ secret     Repository secrets (values are write-only).                           │
+│ orgsecret  Organisation secrets, shared across a namespace's repos.              │
+│ cron       Scheduled builds — with a guard for Drone's seconds-first cron.       │
+│ template   Pipeline templates (namespaced).                                      │
+│ server     Server version, health, queue — and `server doctor`.                  │
+│ user       Your build feed, and user administration (admin only).                │
+│ raw        Escape hatch: call any API endpoint directly.                         │
+│ settings   View & change CLI settings.                                           │
+│ context    Sticky session defaults (repo, etc.) reused across commands.          │
+│ install    Integrate with other tools (e.g. `install claude`).                   │
+╰──────────────────────────────────────────────────────────────────────────────────╯
+```
+
+Global options — `-o/--output json|table|markdown|csv`, `--fields`, `--dry-run`,
+`--stream`, `--no-context` — are stripped from argv before parsing, so they work
+anywhere on the line. Full reference: [docs/COMMANDS.md](docs/COMMANDS.md).
+
 ## The name: `drone-cli`, not `drone`
 
 The installed command is **`drone-cli`**. The name **`drone` belongs to the
@@ -329,6 +373,24 @@ server. The CLI works around what it can and is loud about what it can't.
   web root). Others are documented with the wrong ACL. See
   `spike/VERIFIED_FINDINGS.md`.
 
+## Part of the family
+
+Built on **[agent-tool-shared-cli](https://github.com/alexander-zierhut/agent-tool-shared-cli)** —
+the chassis every tool in this family shares: JSON on stdout, JSON errors on
+stderr, a stable cross-tool exit-code contract, `--dry-run`, four output formats,
+and a built-in `guide` so an agent can learn each tool from the tool itself.
+
+| Tool | Install | For |
+| --- | --- | --- |
+| [**drone-cli**](https://github.com/alexander-zierhut/agent-tool-drone-cli) | `pipx install agent-tool-drone-cli` | Drone CI — builds, failing-step logs, promotions |
+| [**grafana-cli**](https://github.com/alexander-zierhut/agent-tool-grafana-cli) | `pipx install agent-tool-grafana-cli` | Grafana — log discovery, health scan, alert routing |
+| [**openproject**](https://github.com/alexander-zierhut/agent-tool-openproject-cli) | `pipx install agent-tool-openproject-cli` | OpenProject — work packages, time, invoicing |
+| [**lexware-office**](https://github.com/alexander-zierhut/agent-tool-lexware-office-cli) | `pipx install agent-tool-lexware-office-cli` | Lexware Office — invoices, contacts, AR-aging |
+
+They compose over the shared contract:
+`drone-cli wait --commit HEAD && grafana-cli scan --since 10m` answers *"my commit
+built — is it healthy in production?"*
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
