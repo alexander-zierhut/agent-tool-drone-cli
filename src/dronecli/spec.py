@@ -25,6 +25,7 @@ SPEC = AppSpec(
     env_prefix="DRONECLI",
     # The official CLI's variable. Honoured after DRONECLI_TOKEN.
     token_env_aliases=("DRONE_TOKEN",),
+    repo="alexander-zierhut/agent-tool-drone-cli",
 )
 
 credentials = Credentials(SPEC)

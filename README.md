@@ -82,6 +82,7 @@ The top level:
 
 ╭─ Commands ───────────────────────────────────────────────────────────────────────╮
 │ guide      Built-in operating guide — how to use this CLI without external docs. │
+│ report     Report a bug / missing feature — repo + pre-filled issue link.        │
 │ wait       Wait for a commit's build to finish. `--commit HEAD` after a push.    │
 │ promote    Promote a commit/build to a target (default: prod).                   │
 │ auth       Log in, log out, inspect credentials.                                 │

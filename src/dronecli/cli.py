@@ -77,7 +77,7 @@ def _root(
     #  - CI=true is the universal signal;
     #  - DRONE=true is injected by the runner into every build step -- a blocked
     #    prompt there hangs the BUILD until its timeout, not merely a shell.
-    meta = ctx.invoked_subcommand in ("settings", "guide", "install", "context")
+    meta = ctx.invoked_subcommand in ("settings", "guide", "install", "context", "report")
     interactive = (
         not meta
         and sys.stdin.isatty()
@@ -176,6 +176,7 @@ from .commands import (  # noqa: E402
     orgsecret,
     raw,
     repo,
+    report,
     secret,
     server,
     settings,
@@ -184,6 +185,7 @@ from .commands import (  # noqa: E402
 )
 
 app.command("guide", help="Built-in operating guide — how to use this CLI without external docs.")(guide.guide)
+app.command("report", help="Report a bug or missing feature — prints this tool's repo and a pre-filled issue link (offline, no token).")(report.report)
 
 # Top-level shortcuts for the two things an agent does constantly. `wait` is the
 # whole point of the tool; making it `drone-cli build wait` would bury it.

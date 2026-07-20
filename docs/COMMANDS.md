@@ -18,6 +18,7 @@ _Every command also accepts `--output/-o` (json\|table\|markdown\|csv), `--forma
 - [`promote`](#promote) — Promote a commit/build to a target (default: prod).
 - [`raw`](#raw) — Escape hatch: call any API endpoint directly.
 - [`repo`](#repo) — Repositories: list, enable, sync, inspect.
+- [`report`](#report) — Report a bug or missing feature — prints this tool's repo and a pre-filled issue link (offline, no token).
 - [`secret`](#secret) — Repository secrets (values are write-only).
 - [`server`](#server) — Server version, health, queue — and `server doctor`.
 - [`settings`](#settings) — View & change CLI settings.
@@ -802,6 +803,12 @@ commented out: a typo would be stored and returned 200 forever.
 | `--visibility` | public \| private \| internal. Checked here — the server accepts typos. |
 | `--config-path` | Pipeline file to read, e.g. .drone.yml. Wrong value = every build errors. |
 | `--i-understand-this-grants-privileged-containers` | Confirm --trusted without a prompt. Required to grant it off a TTY; it is the only way to say yes non-interactively, and it must be typed deliberately. |
+
+## `report`
+
+### `drone-cli report`
+
+Report a bug or missing feature — prints this tool's repo and a pre-filled issue link (offline, no token).
 
 ## `secret`
 
